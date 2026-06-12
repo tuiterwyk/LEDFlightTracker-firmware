@@ -7,7 +7,7 @@ OTA update host for the LED flight-tracker family. One repo, every board.
 | Board (`OTA_HARDWARE_ID`) | Hardware | Latest manifest | Current |
 |---|---|---|---|
 | `interstate75w` | Interstate 75 W (128×64 HUB75 LED matrix) | [`version-interstate75w.json`](version-interstate75w.json) | v1.5.3 |
-| `matrix_portals3` | Adafruit MatrixPortal ESP32-S3 (128×64 HUB75 LED matrix) | [`version-matrix_portals3.json`](version-matrix_portals3.json) | v3.5.0 |
+| `matrix_portals3` | Adafruit MatrixPortal ESP32-S3 (128×64 HUB75 LED matrix) | [`version-matrix_portals3.json`](version-matrix_portals3.json) | v3.5.1 |
 | `presto` | Pimoroni Presto (RP2350B, 480×480 ST7701 touchscreen) | [`version-presto.json`](version-presto.json) | v2.1.9 |
 
 ## How a device finds updates
