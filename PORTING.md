@@ -141,3 +141,56 @@ md5 -q firmware-<board>-vX.Y.Z.bin
 - [ ] `setTLSConnectTimeout()` at boot
 - [ ] `version-<board>.json` committed + `<board>-vX.Y.Z` release published, md5 verified
 - [ ] confirm: fetch manifest, download binary, md5 matches, device reports new version
+
+## Known issue: OTA staging cleanup (REQUIRED on RP2350/arduino-pico)
+
+A real bug that bites **every** board on this stack, found and fixed on the i75
+(PR #40, v1.5.5). Apply the same fix when porting OTA to any board.
+
+**The bug.** arduino-pico's `Updater::begin(size, U_FLASH)` stages the incoming
+firmware as a **LittleFS file** — `LittleFS.open("firmware.bin", "w+")` — and the
+bootloader (`picoOTA`) flashes it on the next reboot but **never deletes it**. So
+after each OTA a ~firmware-sized file (~770 KB) stays in LittleFS forever. The
+*first* OTA on a unit succeeds; once that leftover plus seeded assets push free
+space below one firmware image, **every later OTA fails to stage**:
+
+- Auto/download path: `fw too big <imgsize>><free>` (size pre-check rejects), or
+- Manual `/update` upload: `OTA FAIL` (the write caps at the stale free value).
+
+The manifest fetch + version compare succeed — only the staging fails — so it
+looks like a network problem but isn't.
+
+**The fix.** In `setup()`, right after LittleFS mounts (any pending update has
+already been applied by the bootloader by then), delete the stale staging file:
+
+```cpp
+if (LittleFS.exists("firmware.bin")) {
+    // pause any flash-unsafe display/DMA here if this platform needs it
+    LittleFS.remove("firmware.bin");
+    // resume
+    Serial.println("[INFO] Reclaimed stale OTA staging file");
+}
+```
+
+Safe because the `picoOTA.commit()` pending-update record is one-shot and already
+consumed before our code runs (units boot once to the new version, no loop), so
+`firmware.bin` is dead weight. Reclaiming it restores free space and **both OTA
+paths then work with no other change**.
+
+> Do **not** chase "bound the image by partition size vs free space" — the i75
+> wasted a version (v1.5.4) on that. The staging is a filesystem file, so free
+> space is the real constraint; this boot-cleanup is the whole fix.
+
+**Platform care.** The i75 wraps `LittleFS.remove()` in `disp::pause()/resume()`
+because its Hub75 DMA ISR lives in flash. Other boards differ (e.g. Presto:
+ST7701 + core-1 scanout) — match whatever guard that repo's existing LittleFS
+writes use, or none if writes are already safe.
+
+**Deploy note (bootstrap).** Units already running the buggy firmware have a full
+LittleFS and **cannot receive this fix over the air** (both OTA paths blocked).
+Flash the fixed build **once via USB** per unit; after that the boot-cleanup keeps
+space healthy and OTA self-sustains.
+
+**Verify.** Confirm `board_build.filesystem_size`, estimate the seeded asset
+footprint, ensure there's room to stage one full firmware image after cleanup,
+then confirm a manual `/update` upload that previously failed now succeeds.
