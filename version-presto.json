@@ -1,6 +1,6 @@
 {
   "hardware": "presto",
-  "version": "v2.1.7",
-  "firmware_url": "https://github.com/tuiterwyk/LEDFlightTracker-firmware/releases/download/presto-v2.1.7/firmware-presto-v2.1.7.bin",
-  "md5": "9854f1f179ba063739e32a43ea5cc60e"
+  "version": "v2.1.8",
+  "firmware_url": "https://github.com/tuiterwyk/LEDFlightTracker-firmware/releases/download/presto-v2.1.8/firmware-presto-v2.1.8.bin",
+  "md5": "d63df94f9e30c275e0f08cbee1619e9d"
 }
