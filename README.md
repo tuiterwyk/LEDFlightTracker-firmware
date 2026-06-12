@@ -2,6 +2,13 @@
 
 OTA update host for the LED flight-tracker family. One repo, every board.
 
+## Boards
+
+| Board (`OTA_HARDWARE_ID`) | Hardware | Latest manifest | Current |
+|---|---|---|---|
+| `interstate75w` | Interstate 75 W (128×64 HUB75 LED matrix) | [`version-interstate75w.json`](version-interstate75w.json) | v1.5.3 |
+| `presto` | Pimoroni Presto (RP2350B, 480×480 ST7701 touchscreen) | [`version-presto.json`](version-presto.json) | v2.1.7 |
+
 ## How a device finds updates
 
 Each board's firmware defaults its `_updateUrl` to its own manifest here:
